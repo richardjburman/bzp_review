@@ -262,91 +262,313 @@ def fig1A(data):
     return(mean_hic, mean_lmic, mean_total, p_value, test, Fig1A_new, SuppFig1A)
 
 #%%
-# total_episodes = data['episodes'].sum()
 
-# freq = data['state'].value_counts()
+def fig1B(data):
 
-# phase1 = np.zeros(shape=(len(data),2))
-# phase2 = np.zeros(shape=(len(data),2))
-# phase3 = np.zeros(shape=(len(data),2))
+    total_episodes = data['episodes'].sum()
 
-# for i in range(len(data)):
-    
-#     group = data.state[i]
-    
-#     episodes = data.episodes[i]
-    
-#     weight = episodes/total_episodes*500
-    
-#     resistance = data.resistance[i]
-    
-#     age = data.age[i]
-    
-#     phase = data.phase[i]
-           
-#     if phase == '10-30min':
+    freq = data['state'].value_counts()
+
+    phase1 = np.zeros(shape=(len(data),2))
+    phase2 = np.zeros(shape=(len(data),2))
+    phase3 = np.zeros(shape=(len(data),2))
+
+    for i in range(len(data)):
         
-#         phase1[i,0] = resistance
+        group = data.state[i]
         
-#         phase1[i,1] = episodes
-
-#     elif phase == '31-60min':
+        episodes = data.episodes[i]
         
-#         phase2[i,0] = resistance
+        weight = episodes/total_episodes*500
         
-#         phase2[i,1] = episodes
-
-#     elif phase == '>60min':
+        resistance = data.resistance[i]
         
-#         phase3[i,0] = resistance
+        age = data.age[i]
         
-#         phase3[i,1] = episodes
+        phase = data.phase[i]
+            
+        if phase == '10-30min':
+            
+            phase1[i,0] = resistance
+            
+            phase1[i,1] = episodes
 
-# phase1_list = np.where(phase1[:,1]>0)
-# phase1_list[0].tolist()
-# phase1_list=phase1_list[0]
+        elif phase == '31-60min':
+            
+            phase2[i,0] = resistance
+            
+            phase2[i,1] = episodes
 
-# phase2_list = np.where(phase2[:,1]>0)
-# phase2_list[0].tolist()
-# phase2_list=phase2_list[0]
+        elif phase == '>60min':
+            
+            phase3[i,0] = resistance
+            
+            phase3[i,1] = episodes
 
-# phase3_list = np.where(phase3[:,1]>0)
-# phase3_list[0].tolist()
-# phase3_list=phase3_list[0]
+    phase1_list = np.where(phase1[:,1]>0)
+    phase1_list[0].tolist()
+    phase1_list=phase1_list[0]
 
-# phase1_f = np.zeros(shape=(len(phase1_list),3))
-# phase2_f = np.zeros(shape=(len(phase2_list),3))
-# phase3_f = np.zeros(shape=(len(phase3_list),3))
+    phase2_list = np.where(phase2[:,1]>0)
+    phase2_list[0].tolist()
+    phase2_list=phase2_list[0]
 
-# for i in range(len(phase1_list)):
-    
-#     index = phase1_list[i]
-    
-#     phase1_f[i,0] = phase1[index,0]
-#     phase1_f[i,1] = phase1[index,1]
-#     phase1_f[i,2] = phase1_f[i,0]*phase1_f[i,1]
-    
-# for i in range(len(phase2_list)):
-    
-#     index = phase2_list[i]
-    
-#     phase2_f[i,0] = phase2[index,0]
-#     phase2_f[i,1] = phase2[index,1]
-#     phase2_f[i,2] = phase2_f[i,0]*phase2_f[i,1]
-    
-# for i in range(len(phase3_list)):
-    
-#     index = phase3_list[i]
-    
-#     phase3_f[i,0] = phase3[index,0]
-#     phase3_f[i,1] = phase3[index,1]
-#     phase3_f[i,2] = phase3_f[i,0]*phase3_f[i,1]    
-    
-# mean_diff_phase1 = np.sum(phase1_f[:,2],axis=0)/np.sum(phase1_f[:,1],axis=0)*100
-# print(mean_diff_phase1)
+    phase3_list = np.where(phase3[:,1]>0)
+    phase3_list[0].tolist()
+    phase3_list=phase3_list[0]
 
-# mean_diff_phase2 = np.sum(phase2_f[:,2],axis=0)/np.sum(phase2_f[:,1],axis=0)*100
-# print(mean_diff_phase2)
+    phase1_f = np.zeros(shape=(len(phase1_list),3))
+    phase2_f = np.zeros(shape=(len(phase2_list),3))
+    phase3_f = np.zeros(shape=(len(phase3_list),3))
 
-# mean_diff_phase3 = np.sum(phase3_f[:,2],axis=0)/np.sum(phase3_f[:,1],axis=0)*100
-# print(mean_diff_phase3)
+    for i in range(len(phase1_list)):
+        
+        index = phase1_list[i]
+        
+        phase1_f[i,0] = phase1[index,0]
+        phase1_f[i,1] = phase1[index,1]
+        phase1_f[i,2] = phase1_f[i,0]*phase1_f[i,1]
+        
+    for i in range(len(phase2_list)):
+        
+        index = phase2_list[i]
+        
+        phase2_f[i,0] = phase2[index,0]
+        phase2_f[i,1] = phase2[index,1]
+        phase2_f[i,2] = phase2_f[i,0]*phase2_f[i,1]
+        
+    for i in range(len(phase3_list)):
+        
+        index = phase3_list[i]
+        
+        phase3_f[i,0] = phase3[index,0]
+        phase3_f[i,1] = phase3[index,1]
+        phase3_f[i,2] = phase3_f[i,0]*phase3_f[i,1]    
+        
+    mean_diff_phase1 = np.sum(phase1_f[:,2],axis=0)/np.sum(phase1_f[:,1],axis=0)*100
+    print(mean_diff_phase1)
+
+    mean_diff_phase2 = np.sum(phase2_f[:,2],axis=0)/np.sum(phase2_f[:,1],axis=0)*100
+    print(mean_diff_phase2)
+
+    mean_diff_phase3 = np.sum(phase3_f[:,2],axis=0)/np.sum(phase3_f[:,1],axis=0)*100
+    print(mean_diff_phase3)
+
+    #plotting new figure which separates across SE duration between economic groups
+
+    Fig1B,ax=plt.subplots(figsize=(5,5))
+
+    x = [.2,.3,.4]
+
+    total_episodes = data['episodes'].sum()
+
+    freq = data['state'].value_counts()
+
+    phase1 = np.zeros(shape=(len(data),2))
+    phase2 = np.zeros(shape=(len(data),2))
+    phase3 = np.zeros(shape=(len(data),2))
+
+    for i in range(len(data)):
+        
+        group = data.state[i]
+        
+        episodes = data.episodes[i]
+        
+        weight = 10
+        
+        resistance = data.resistance[i]*100
+        
+        age = data.age[i]
+        
+        phase = data.phase[i]
+        
+        marker = 'o'
+            
+        if phase == '10-30min' and group == 'high-income':
+            
+            phase1[i,0] = resistance
+            
+            phase1[i,1] = episodes
+            
+            ax.plot(x[0]-.015, resistance,markersize=weight, color = 'blue', marker = marker, alpha=.25)
+
+        elif phase == '10-30min' and group == 'low-middle-income':
+            
+            phase1[i,0] = resistance
+            
+            phase1[i,1] = episodes
+            
+            ax.plot(x[0]+.015, resistance,markersize=weight, color = 'red', marker = marker, alpha=.25)
+        
+        elif phase == '31-60min' and group == 'high-income':
+            
+            phase2[i,0] = resistance
+            
+            phase2[i,1] = episodes
+            
+            ax.plot(x[1]-.015, resistance,markersize=weight, color = 'blue', marker = marker, alpha=.5)
+
+        elif phase == '31-60min' and group == 'low-middle-income':
+            
+            phase2[i,0] = resistance
+            
+            phase2[i,1] = episodes
+            
+            ax.plot(x[1]+.015, resistance,markersize=weight, color = 'red', marker = marker, alpha=.5)
+        
+        elif phase == '>60min' and group == 'high-income':
+            
+            phase3[i,0] = resistance
+            
+            phase3[i,1] = episodes
+            
+            ax.plot(x[2]-.015, resistance,markersize=weight, color = 'blue', marker = marker, alpha=.75)
+
+        elif phase == '>60min' and group == 'low-middle-income':
+            
+            phase3[i,0] = resistance
+            
+            phase3[i,1] = episodes
+            
+            ax.plot(x[2]+.015, resistance,markersize=weight, color = 'red', marker = marker, alpha=.75)
+        
+    ax.plot(x[0],mean_diff_phase1, markersize=15, color='black', marker = 'o', alpha=.25)
+    ax.plot(x[1],mean_diff_phase2, markersize=15, color='black', marker = 'o', alpha=.5)
+    ax.plot(x[2],mean_diff_phase3, markersize=15, color='black', marker = 'o', alpha=.75)
+            
+    plt.xlim(.1,.5)
+
+    ax.set_xticks(x)
+
+    labels = ['10-30min','31-60min','>60min']
+
+    ax.set_xticklabels(labels)
+
+    ax.set_ylabel('BZP-R (%)')
+
+    #plotting original figure with all detail (i.e. stratified across duration of SE, age of participants, number of participants and economic groups)
+      
+    SuppFig1B,ax=plt.subplots(figsize=(5,5))
+
+    x = [.2,.3,.4]
+
+    total_episodes = data['episodes'].sum()
+
+    freq = data['state'].value_counts()
+
+    phase1 = np.zeros(shape=(len(data),2))
+    phase2 = np.zeros(shape=(len(data),2))
+    phase3 = np.zeros(shape=(len(data),2))
+
+    for i in range(len(data)):
+        
+        group = data.state[i]
+        
+        episodes = data.episodes[i]
+        
+        weight = episodes/total_episodes*500
+        
+        resistance = data.resistance[i]*100
+        
+        age = data.age[i]
+        
+        phase = data.phase[i]
+        
+        marker = 'o'
+        
+        if age == 'paediatric':
+            
+            color = 'magenta'
+
+        elif age == 'adult':
+            
+            color = 'blue'
+
+        elif age == 'both':
+            
+            color = 'black'           
+
+    #    if group == 'developed':
+            
+    #        color = 'blue'
+
+    #    elif group == 'developing':
+            
+    #        color = 'magenta'     
+            
+        if phase == '10-30min' and group == 'high-income':
+            
+            phase1[i,0] = resistance
+            
+            phase1[i,1] = episodes
+            
+            ax.plot(x[0]-.015, resistance,markersize=weight, color = color, marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)
+
+        elif phase == '10-30min' and group == 'low-middle-income':
+            
+            phase1[i,0] = resistance
+            
+            phase1[i,1] = episodes
+            
+            ax.plot(x[0]+.015, resistance,markersize=weight, color = color, marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)
+        
+        elif phase == '31-60min' and group == 'high-income':
+            
+            phase2[i,0] = resistance
+            
+            phase2[i,1] = episodes
+            
+            ax.plot(x[1]-.015, resistance,markersize=weight, color = color, marker = marker, markeredgecolor = color, markeredgewidth=2,alpha=.2)        
+
+        elif phase == '31-60min' and group == 'low-middle-income':
+            
+            phase2[i,0] = resistance
+            
+            phase2[i,1] = episodes
+            
+            ax.plot(x[1]+.015, resistance,markersize=weight, color = color, marker = marker, markeredgecolor = color, markeredgewidth=2,alpha=.2)               
+            
+        elif phase == '>60min' and group == 'high-income':
+            
+            phase3[i,0] = resistance
+            
+            phase3[i,1] = episodes
+            
+            ax.plot(x[2]-.015, resistance,markersize=weight, color = color, marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
+
+        elif phase == '>60min' and group == 'low-middle-income':
+            
+            phase3[i,0] = resistance
+            
+            phase3[i,1] = episodes
+            
+            ax.plot(x[2]+.015, resistance,markersize=weight, color = color, marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
+            
+    ax.plot(x[0],mean_diff_phase1, markersize=15, color='green', marker = 'o')
+    ax.plot(x[1],mean_diff_phase2, markersize=15, color='green', marker = 'o')
+    ax.plot(x[2],mean_diff_phase3, markersize=15, color='green', marker = 'o')
+            
+    plt.xlim(.1,.5)
+
+    ax.set_xticks(x)
+
+    labels = ['10-30min','31-60min','>60min']
+
+    ax.set_xticklabels(labels)
+
+    ax.set_ylabel('BZP-R (%)')
+
+    ax.plot(.125,80,markersize=10,marker='o',color='blue',alpha=.2)
+    plt.text(.140, 78, 'Adult only', fontsize=12)
+    ax.plot(.125,75,markersize=10,marker='o',color='magenta',alpha=.2)
+    plt.text(.140, 73, 'Paediatric only', fontsize=12)
+    ax.plot(.125,70,markersize=10,marker='o',color='black',alpha=.2)
+    plt.text(.140, 68, 'Mixed', fontsize=12)
+    #ax.plot(.125,65,markersize=10,marker='*',color='black')
+    #plt.text(.140, 63, 'Mean diff.', fontsize=12)
+    #ax.plot(.125,60,markersize=10,marker='_',color='blue')
+    #plt.text(.140, 58, 'Developed', fontsize=12)
+    #ax.plot(.125,55,markersize=10,marker='_',color='magenta')
+    #plt.text(.140, 53, 'Developing', fontsize=12)
+
+    return(Fig1B, SuppFig1B)
