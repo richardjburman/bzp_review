@@ -81,13 +81,19 @@ def fig1A(data):
         lmic_final[i,1] = lmic[index,1]
         lmic_final[i,2] = lmic_final[i,0]*lmic_final[i,1]
 
-    #calculating weighted mean difference
-    #     
-    mean_hic = np.sum(hic_final[:,2],axis=0)/np.sum(hic_final[:,1],axis=0)*100
+    #calculating mean and weighted mean difference between economic groups
+    
+    mean_hic = np.mean(hic_final[:,0])*100
 
-    mean_lmic = np.sum(lmic_final[:,2],axis=0)/np.sum(lmic_final[:,1],axis=0)*100
+    mean_lmic = np.mean(lmic_final[:,0])*100
 
-    mean_total = np.sum(total[:,2],axis=0)/np.sum(total[:,1],axis=0)*100 
+    mean_total = np.mean(total[:,0])*100
+
+    mean_diff_hic = np.sum(lmic_final[:,2],axis=0)/np.sum(lmic_final[:,1],axis=0)*100
+    
+    mean_diff_lmic = np.sum(lmic_final[:,2],axis=0)/np.sum(lmic_final[:,1],axis=0)*100
+
+    mean_diff_total = np.sum(total[:,2],axis=0)/np.sum(total[:,1],axis=0)*100 
 
     #working out ditribution of resistance values
     shapiro_data1 = stats.shapiro(lmic_final[:,2])
@@ -104,8 +110,9 @@ def fig1A(data):
    
     #plotting new figure which collapses data to separate only between economic groups
 
+    Fig1A,ax=plt.subplots(figsize=(5,5))
 
-    Fig1A_new,ax=plt.subplots(figsize=(5,5))
+    plt.title('Fig1A')
 
     x = [.2,.3]
 
@@ -161,7 +168,7 @@ def fig1A(data):
 
     ax.plot(x[0],mean_hic, markersize=15, color='blue', marker = 'o')
     ax.plot(x[1],mean_lmic, markersize=15, color='red', marker = 'o')
-    #ax.plot(.25,mean_total, markersize=15, color='black', marker = 'o')
+    ax.plot(.25,mean_total, markersize=15, color='black', marker = 'o')
 
     #ax.plot(.125,73,markersize=10,marker='*',color='black')
     #plt.text(.140, 71, 'Mean diff.', fontsize=12)
@@ -180,9 +187,13 @@ def fig1A(data):
 
     ax.annotate(p,(posOne,axes_limits[1]+.5),color = 'black',fontsize=font_size)
 
+    plt.close(Fig1A)
+
     #plotting original figure with all detail (i.e. stratified across economic groups, ages and weighted according to sample size)
 
     SuppFig1A,ax=plt.subplots(figsize=(5,5))
+
+    plt.title('SuppFig1A')
 
     x = [.2,.3]
 
@@ -232,9 +243,9 @@ def fig1A(data):
 
     ax.set_ylabel('BZP-R (%)')
 
-    #ax.plot(x[0],mean_hic, markersize=15, color='blue', marker = 'o')
-    #ax.plot(x[1],mean_lmic, markersize=15, color='red', marker = 'o')
-    #ax.plot(.25,mean_total, markersize=15, color='black', marker = 'o')
+    ax.plot(x[0],mean_diff_hic, markersize=15, color='blue', marker = 'o')
+    ax.plot(x[1],mean_diff_lmic, markersize=15, color='red', marker = 'o')
+    ax.plot(.25,mean_diff_total, markersize=15, color='black', marker = 'o')
 
     ax.plot(.125,88,markersize=10,marker='o',color='blue',alpha=.2)
     plt.text(.140, 86, 'Adult only', fontsize=12)
@@ -245,21 +256,9 @@ def fig1A(data):
     ax.plot(.125,78,markersize=10,marker='o',color='magenta',alpha=.2)
     plt.text(.140, 76, 'Paediatric only', fontsize=12)
 
-    #ax.plot(.125,73,markersize=10,marker='*',color='black')
-    #plt.text(.140, 71, 'Mean diff.', fontsize=12)
-    #ax.axhline(mean_total, linewidth=1, linestyle='--', color = 'black')
+    plt.close(SuppFig1A)
 
-    ax.plot([x[0],x[1]],[axes_limits[1],axes_limits[1]],color='black', lw=1)
-
-    posOne = x[1]-(x[1]-x[0])+(x[1]-x[0])/4
-
-    p = 'p = ' + str(np.round(p_value[1],2))
-
-    font_size = 10
-
-    ax.annotate(p,(posOne,axes_limits[1]+.5),color = 'black',fontsize=font_size)
-
-    return(mean_hic, mean_lmic, mean_total, p_value, test, Fig1A_new, SuppFig1A)
+    return(mean_hic, mean_lmic, mean_total, p_value, test, Fig1A,  mean_diff_hic, mean_diff_lmic, mean_diff_total, SuppFig1A)
 
 #%%
 
@@ -383,14 +382,14 @@ def fig1B(data):
         phase = data.phase[i]
         
         marker = 'o'
-            
+           
         if phase == '10-30min' and group == 'high-income':
             
             phase1[i,0] = resistance
             
             phase1[i,1] = episodes
             
-            ax.plot(x[0]-.015, resistance,markersize=weight, color = 'blue', marker = marker, alpha=.25)
+            ax.plot(x[0]-.015, resistance,markersize=weight, color = 'blue', marker = marker, alpha=.2)
 
         elif phase == '10-30min' and group == 'low-middle-income':
             
@@ -398,7 +397,7 @@ def fig1B(data):
             
             phase1[i,1] = episodes
             
-            ax.plot(x[0]+.015, resistance,markersize=weight, color = 'red', marker = marker, alpha=.25)
+            ax.plot(x[0]+.015, resistance,markersize=weight, color = 'red', marker = marker, alpha=.2)
         
         elif phase == '31-60min' and group == 'high-income':
             
@@ -406,7 +405,7 @@ def fig1B(data):
             
             phase2[i,1] = episodes
             
-            ax.plot(x[1]-.015, resistance,markersize=weight, color = 'blue', marker = marker, alpha=.5)
+            ax.plot(x[1]-.015, resistance,markersize=weight, color = 'blue', marker = marker,alpha=.2)        
 
         elif phase == '31-60min' and group == 'low-middle-income':
             
@@ -414,15 +413,15 @@ def fig1B(data):
             
             phase2[i,1] = episodes
             
-            ax.plot(x[1]+.015, resistance,markersize=weight, color = 'red', marker = marker, alpha=.5)
-        
+            ax.plot(x[1]+.015, resistance,markersize=weight, color = 'red', marker = marker,alpha=.2)               
+            
         elif phase == '>60min' and group == 'high-income':
             
             phase3[i,0] = resistance
             
             phase3[i,1] = episodes
             
-            ax.plot(x[2]-.015, resistance,markersize=weight, color = 'blue', marker = marker, alpha=.75)
+            ax.plot(x[2]-.015, resistance,markersize=weight, color = 'blue', marker = marker, alpha=.2)        
 
         elif phase == '>60min' and group == 'low-middle-income':
             
@@ -430,11 +429,11 @@ def fig1B(data):
             
             phase3[i,1] = episodes
             
-            ax.plot(x[2]+.015, resistance,markersize=weight, color = 'red', marker = marker, alpha=.75)
-        
-    ax.plot(x[0],mean_diff_phase1, markersize=15, color='black', marker = 'o', alpha=.25)
-    ax.plot(x[1],mean_diff_phase2, markersize=15, color='black', marker = 'o', alpha=.5)
-    ax.plot(x[2],mean_diff_phase3, markersize=15, color='black', marker = 'o', alpha=.75)
+            ax.plot(x[2]+.015, resistance,markersize=weight, color = 'red', marker = marker, markeredgewidth=2, alpha=.2)        
+            
+    ax.plot(x[0],mean_diff_phase1, markersize=15, color='purple', marker = 'o')
+    ax.plot(x[1],mean_diff_phase2, markersize=15, color='purple', marker = 'o')
+    ax.plot(x[2],mean_diff_phase3, markersize=15, color='purple', marker = 'o')
             
     plt.xlim(.1,.5)
 
@@ -544,9 +543,9 @@ def fig1B(data):
             
             ax.plot(x[2]+.015, resistance,markersize=weight, color = color, marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
             
-    ax.plot(x[0],mean_diff_phase1, markersize=15, color='green', marker = 'o')
-    ax.plot(x[1],mean_diff_phase2, markersize=15, color='green', marker = 'o')
-    ax.plot(x[2],mean_diff_phase3, markersize=15, color='green', marker = 'o')
+    ax.plot(x[0],mean_diff_phase1, markersize=15, color='black', marker = 'o')
+    ax.plot(x[1],mean_diff_phase2, markersize=15, color='black', marker = 'o')
+    ax.plot(x[2],mean_diff_phase3, markersize=15, color='black', marker = 'o')
             
     plt.xlim(.1,.5)
 
