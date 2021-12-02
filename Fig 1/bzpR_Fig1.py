@@ -10,10 +10,10 @@ import pandas as pd
 import matplotlib.pylab as plt
 import seaborn as sns
 from scipy import stats
-
+from tabulate import tabulate
+from statsmodels.stats.weightstats import DescrStatsW
 
 #%%
-
 def fig1A(data):
 
     total_episodes = data['episodes'].sum()
@@ -27,14 +27,8 @@ def fig1A(data):
         group = data.state[i]
         
         episodes = data.episodes[i]
-        
-        weight = episodes/total_episodes*200
-        
+               
         resistance = data.resistance[i]
-        
-        age = data.age[i]
-        
-        phase = data.phase[i]
         
         total[i,0] = resistance
 
@@ -42,13 +36,13 @@ def fig1A(data):
         
         total[i,2] = episodes*resistance
             
-        if group == 'high-income':
+        if group == 'HIC':
             
             hic[i,0] = resistance
             
             hic[i,1] = episodes
 
-        elif group == 'low-middle-income':
+        elif group == 'LMIC':
             
             lmic[i,0] = resistance
             
@@ -83,17 +77,14 @@ def fig1A(data):
 
     #calculating mean and weighted mean difference between economic groups
     
-    mean_hic = np.mean(hic_final[:,0])*100
+    mean_hic = np.mean(hic_final[:,0])
+    sem_hic = stats.sem(hic_final[:,0])
 
-    mean_lmic = np.mean(lmic_final[:,0])*100
+    mean_lmic = np.mean(lmic_final[:,0])
+    sem_lmic = stats.sem(lmic_final[:,0])
 
-    mean_total = np.mean(total[:,0])*100
-
-    mean_diff_hic = np.sum(lmic_final[:,2],axis=0)/np.sum(lmic_final[:,1],axis=0)*100
-    
-    mean_diff_lmic = np.sum(lmic_final[:,2],axis=0)/np.sum(lmic_final[:,1],axis=0)*100
-
-    mean_diff_total = np.sum(total[:,2],axis=0)/np.sum(total[:,1],axis=0)*100 
+    mean_total = np.mean(total[:,0])
+    sem_total = stats.sem(total[:,0])
 
     #working out ditribution of resistance values
     shapiro_data1 = stats.shapiro(lmic_final[:,0])
@@ -107,6 +98,48 @@ def fig1A(data):
     elif shapiro_data1 or shapiro_data2 <0.05:
         p_value = stats.mannwhitneyu(lmic_final[:,0],hic_final[:,0])
         test = 'mann-whitney'   
+
+    mean_diff_hic = np.sum(lmic_final[:,2],axis=0)/np.sum(lmic_final[:,1],axis=0)*100
+    
+    mean_diff_lmic = np.sum(lmic_final[:,2],axis=0)/np.sum(lmic_final[:,1],axis=0)*100
+
+    mean_diff_total = np.sum(total[:,2],axis=0)/np.sum(total[:,1],axis=0)*100 
+
+    hic_data = hic_final[:,0]
+    hic_weights = hic_final[:,1]
+
+    weighted_stats_hic = DescrStatsW(hic_data, hic_weights, ddof=1)
+
+    lmic_data = lmic_final[:,0]
+    lmic_weights = lmic_final[:,1]
+
+    weighted_stats_lmic = DescrStatsW(lmic_data, lmic_weights, ddof=1)
+
+    total_data = lmic_final[:,0]
+    total_weights = lmic_final[:,1]
+
+    weighted_stats_total = DescrStatsW(total_data, total_weights, ddof=1)
+
+    nonweighted_stats = {
+                                'Mean HIC' : mean_hic,
+                                'SEM HIC': sem_hic,
+                                'Mean LMIC' : mean_lmic,
+                                'SEM LMIC' : sem_lmic,
+                                'Mean Total' : mean_total,
+                                'SEM Total' : sem_total,
+                                'p-value' : p_value,
+                                'test' : test,
+                                
+                            }
+
+    weighted_stats = {
+                        'Weighted Mean HIC' : weighted_stats_hic.mean,
+                        'Weighted SEM HIC': weighted_stats_hic.std_mean,
+                        'Weighted Mean LMIC' : weighted_stats_lmic.mean,
+                        'Weighted SEM LMIC' : weighted_stats_lmic.std_mean,
+                        'Weighted Mean Total' : weighted_stats_total.mean,
+                        'Weighted SEM Total' : weighted_stats_total.std_mean,
+                    }
    
     #plotting new figure which collapses data to separate only between economic groups
 
@@ -123,38 +156,16 @@ def fig1A(data):
     for i in range(len(data)):
         
         group = data.state[i]
-        
-        episodes = data.episodes[i]
-        
-        weight = episodes/total_episodes*300
-        
-        resistance = data.resistance[i]*100
-        
-        age = data.age[i]
-        
-        if group == 'high-income' and age == 'adult':
+                
+        resistance = data.resistance[i]
+               
+        if group == 'HIC':
             
             ax.plot(x[0], resistance,markersize=10, color='blue', marker = 'o',alpha=.2)
-    
-        elif group == 'high-income' and age == 'paediatric':
-            
-            ax.plot(x[0], resistance,markersize=10, color='blue', marker = 'o',alpha=.2)
-            
-        elif group == 'high-income' and age == 'both':
-            
-            ax.plot(x[0], resistance,markersize=10, color='blue', marker = 'o',alpha=.2)        
 
-        elif group == 'low-middle-income' and age == 'adult':
+        elif group == 'LMIC':
             
-            ax.plot(x[1], resistance,markersize=10, color='red', marker = 'o',alpha=.2)
-
-        elif group == 'low-middle-income' and age == 'paediatric':
-            
-            ax.plot(x[1], resistance,markersize=10, color='red', marker = 'o',alpha=.2)       
-            
-        elif group == 'low-middle-income' and age == 'both':
-            
-            ax.plot(x[1], resistance,markersize=10, color='red', marker = 'o',alpha=.2)        
+            ax.plot(x[1], resistance,markersize=10, color='red', marker = 'o',alpha=.2)    
             
     plt.xlim(.1,.4)
 
@@ -166,18 +177,21 @@ def fig1A(data):
 
     ax.set_ylabel('BZP-R (%)')
 
-    ax.plot(x[0],mean_hic, markersize=15, color='blue', marker = 'o')
-    ax.plot(x[1],mean_lmic, markersize=15, color='red', marker = 'o')
-    ax.plot(.25,mean_total, markersize=15, color='black', marker = 'o')
+    ax.plot([x[0],x[0]],[mean_hic-sem_hic,mean_hic+sem_hic],color='blue', lw=3)
+    ax.plot([x[1],x[1]],[mean_lmic-sem_lmic,mean_lmic+sem_lmic],color='red', lw=3)
+    ax.plot([.25,.25],[mean_total-sem_total,mean_total+sem_total],color='purple', lw=3)
 
-    #ax.plot(.125,73,markersize=10,marker='*',color='black')
-    #plt.text(.140, 71, 'Mean diff.', fontsize=12)
+    ax.plot(x[0],mean_hic, markersize=15, color='white',markeredgecolor = 'blue', marker = 'o')
+    ax.plot(x[1],mean_lmic, markersize=15, color='white',markeredgecolor = 'red', marker = 'o')
+    ax.plot(.25,mean_total, markersize=15, color='white',markeredgecolor = 'purple', marker = 'o')
 
-    #ax.axhline(mean_total, linewidth=1, linestyle='--', color = 'black')
+    ax.plot(.115,88,markersize=10, color='white',markeredgecolor = 'purple', marker = 'o')
+    plt.text(.130, 86, 'Mean total', fontsize=12)
 
     axes_limits = ax.get_ylim()
 
     ax.plot([x[0],x[1]],[axes_limits[1],axes_limits[1]],color='black', lw=1)
+
 
     posOne = x[1]-(x[1]-x[0])+(x[1]-x[0])/4
 
@@ -205,31 +219,31 @@ def fig1A(data):
     
         weight = episodes/total_episodes*300
     
-        resistance = data.resistance[i]*100
+        resistance = data.resistance[i]
     
         age = data.age[i]
     
-        if group == 'high-income' and age == 'adult':
+        if group == 'HIC' and age == 'adult':
         
             ax.plot(x[0]-.015, resistance,markersize=weight, color='blue', marker = 'o',alpha=.2)
    
-        elif group == 'high-income' and age == 'paediatric':
+        elif group == 'HIC' and age == 'paediatric':
         
             ax.plot(x[0]+.015, resistance,markersize=weight, color='magenta', marker = 'o',alpha=.2)
         
-        elif group == 'high-income' and age == 'both':
+        elif group == 'HIC' and age == 'both':
         
             ax.plot(x[0], resistance,markersize=weight, color='black', marker = 'o',alpha=.2)        
 
-        elif group == 'low-middle-income' and age == 'adult':
+        elif group == 'LMIC' and age == 'adult':
         
             ax.plot(x[1]-.015, resistance,markersize=weight, color='blue', marker = 'o',alpha=.2)
 
-        elif group == 'low-middle-income' and age == 'paediatric':
+        elif group == 'LMIC' and age == 'paediatric':
         
             ax.plot(x[1]+.015, resistance,markersize=weight, color='magenta', marker = 'o',alpha=.2)       
         
-        elif group == 'low-middle-income' and age == 'both':
+        elif group == 'LMIC' and age == 'both':
         
             ax.plot(x[1], resistance,markersize=weight, color='black', marker = 'o',alpha=.2)        
         
@@ -243,22 +257,25 @@ def fig1A(data):
 
     ax.set_ylabel('BZP-R (%)')
 
-    ax.plot(x[0],mean_diff_hic, markersize=15, color='blue', marker = 'o')
-    ax.plot(x[1],mean_diff_lmic, markersize=15, color='red', marker = 'o')
-    ax.plot(.25,mean_diff_total, markersize=15, color='black', marker = 'o')
+    ax.plot(x[0],weighted_stats_hic.mean, markersize=15, color='blue', marker = 'o')
+    ax.plot(x[1],weighted_stats_lmic.mean, markersize=15, color='red', marker = 'o')
+    ax.plot(.25,weighted_stats_total.mean, markersize=15, color='purple', marker = 'o')
 
-    ax.plot(.125,88,markersize=10,marker='o',color='blue',alpha=.2)
-    plt.text(.140, 86, 'Adult only', fontsize=12)
+    ax.plot(.115,88,markersize=10,marker='o',color='blue',alpha=.2)
+    plt.text(.130, 86, 'Adult only', fontsize=12)
 
-    ax.plot(.125,83,markersize=10,marker='o',color='black',alpha=.2)
-    plt.text(.140, 81, 'Mixed', fontsize=12)
+    ax.plot(.115,83,markersize=10,marker='o',color='black',alpha=.2)
+    plt.text(.130, 81, 'Mixed', fontsize=12)
 
-    ax.plot(.125,78,markersize=10,marker='o',color='magenta',alpha=.2)
-    plt.text(.140, 76, 'Paediatric only', fontsize=12)
+    ax.plot(.115,78,markersize=10,marker='o',color='magenta',alpha=.2)
+    plt.text(.130, 76, 'Paediatric only', fontsize=12)
+
+    ax.plot(.115,73,markersize=10,marker='o',color='purple')
+    plt.text(.130, 71, 'Mean diff.', fontsize=12)
 
     plt.close(SuppFig1A)
 
-    return(mean_hic, mean_lmic, mean_total, p_value, test, Fig1A,  mean_diff_hic, mean_diff_lmic, mean_diff_total, SuppFig1A)
+    return(Fig1A, SuppFig1A, nonweighted_stats, weighted_stats)
 
 #%%
 
@@ -463,27 +480,22 @@ def fig1B(data):
 
     plt.close(Fig1B)
 
-    #outputs from plot1:
-    # mean_sub30,
-    # mean_over30sub60,
-    # mean_sub60,
-    # mean_over60,
-    # p_value,
-    # test,
+    weighted_means_phases = {
+                                'Weighted mean 10-30min' : mean_diff_sub30,
+                                'Weighted mean 31-60min' : mean_diff_over30sub60, 
+                                'Weighted mean >60min'   : mean_diff_over60,
+                            }
 
-    # Fig1B,
-
-    # mean_diff_sub30,
-    # mean_diff_over30sub60,
-    # mean_diff_sub60,
-    # mean_diff_over60,
-
-    return(mean_sub30,mean_over30sub60,mean_sub60,mean_over60,p_value,test,Fig1B)
+    return(mean_sub30,mean_over30sub60,mean_sub60,mean_over60,p_value,test,weighted_means_phases,Fig1B)
 
 #%%
-#plot2
+#function to generate supplementary figures to complement Figure 1B
 
-def suppfig1B(data, p_value):
+def suppfigs(data, p_value, weighted_means_phases):
+
+    mean_diff_sub30 = weighted_means_phases['Weighted mean 10-30min']
+    mean_diff_over30sub60 = weighted_means_phases['Weighted mean 31-60min']
+    mean_diff_over60 = weighted_means_phases['Weighted mean >60min']
 
     #hic
     sub30_hic = np.zeros(shape=(len(data),2))
@@ -501,7 +513,7 @@ def suppfig1B(data, p_value):
         
         phase = data.phase[i]
                 
-        if phase == '10-30min' and group == 'high-income':
+        if phase == '10-30min' and group == 'HIC':
             
             sub30_hic[i,0] = resistance
             
@@ -511,7 +523,7 @@ def suppfig1B(data, p_value):
             
             sub60_hic[i,1] = episodes
             
-        elif phase == '31-60min' and group == 'high-income':
+        elif phase == '31-60min' and group == 'HIC':
             
             over30sub60_hic[i,0] = resistance
             
@@ -521,7 +533,7 @@ def suppfig1B(data, p_value):
             
             sub60_hic[i,1] = episodes
             
-        elif phase == '>60min' and group == 'high-income':
+        elif phase == '>60min' and group == 'HIC':
             
             over60_hic[i,0] = resistance
             
@@ -631,7 +643,7 @@ def suppfig1B(data, p_value):
         
         phase = data.phase[i]
                 
-        if phase == '10-30min' and group == 'low-middle-income':
+        if phase == '10-30min' and group == 'LMIC':
             
             sub30_lmic[i,0] = resistance
             
@@ -641,7 +653,7 @@ def suppfig1B(data, p_value):
             
             sub60_lmic[i,1] = episodes
             
-        elif phase == '31-60min' and group == 'low-middle-income':
+        elif phase == '31-60min' and group == 'LMIC':
             
             over30sub60_lmic[i,0] = resistance
             
@@ -651,7 +663,7 @@ def suppfig1B(data, p_value):
             
             sub60_lmic[i,1] = episodes
             
-        elif phase == '>60min' and group == 'low-middle-income':
+        elif phase == '>60min' and group == 'LMIC':
             
             over60_lmic[i,0] = resistance
             
@@ -819,224 +831,247 @@ def suppfig1B(data, p_value):
 
     axes_limits = ax.get_ylim()
 
-    ax.plot([x[0],x[1]],[axes_limits[1],axes_limits[1]],color='black', lw=1)
+    ax.plot([x[0],x[1]],[axes_limits[1]+10,axes_limits[1]+10],color='black', lw=1)
+    ax.plot([x[0]-.01,x[1]-.01],[axes_limits[1]-10,axes_limits[1]-10],color='black', lw=1)
+    ax.plot([x[0]+.01,x[1]+.01],[axes_limits[1],axes_limits[1]],color='black', lw=1)
 
     posOne = x[1]-(x[1]-x[0])+(x[1]-x[0])/4
+    posHIC = (x[1]-.01)-((x[1]-.01)-(x[0]-.01))+((x[1]-.01)-(x[0]-.01))/4
+    posLMIC = (x[1]+.01)-((x[1]+.01)-(x[0]+.01))+((x[1]+.01)-(x[0]+.01))/4
 
     p = 'p = ' + str(np.round(p_value[1],2))
+    pHIC = 'p = ' + str(np.round(p_value_hic[1],2))
+    pLMIC = 'p = ' + str(np.round(p_value_lmic[1],2))
 
     font_size = 10
 
-    ax.annotate(p,(posOne,axes_limits[1]+.5),color = 'black',fontsize=font_size)
+    ax.annotate(p,(posOne,axes_limits[1]+10.5),color = 'black',fontsize=font_size)
+    ax.annotate(pHIC,(posHIC,axes_limits[1]-9.5),color = 'black',fontsize=font_size)
+    ax.annotate(pLMIC,(posLMIC,axes_limits[1]+.5),color = 'black',fontsize=font_size)
 
     plt.close(SuppFig1B)
 
     data_hic = {
-                            'Mean 10-30min HIC' : mean_sub30_hic,
-                            'Mean 31-60min HIC' : mean_over30sub60_hic, 
-                            'Mean <60min HIC'       : mean_sub60_hic,
-                            'Mean >60min HIC'       : mean_over60_hic,
-                            'p-value HIC'       : p_value_hic,
-                            'Test HIC'              : test_hic
+                            'Mean 10-30min HIC'  : mean_sub30_hic,
+                            'Mean 31-60min HIC'  : mean_over30sub60_hic, 
+                            'Mean <60min HIC'    : mean_sub60_hic,
+                            'Mean >60min HIC'    : mean_over60_hic,
+                            'p-value HIC'        : p_value_hic,
+                            'Test HIC'           : test_hic
                             }
 
     data_lmic = {
                             'Mean 10-30min LMIC' : mean_sub30_lmic,
                             'Mean 31-60min LMIC' : mean_over30sub60_lmic, 
-                            'Mean <60min LMIC'        : mean_sub60_lmic,
-                            'Mean >60min LMIC'        : mean_over60_lmic,
+                            'Mean <60min LMIC'   : mean_sub60_lmic,
+                            'Mean >60min LMIC'   : mean_over60_lmic,
                             'p-value LMIC'       : p_value_lmic,
-                            'Test LMIC'               : test_lmic
+                            'Test LMIC'          : test_lmic
                             }
 
-    return(data_hic, data_lmic, SuppFig1B)
 
-# #%%
+#%%
+#contingency table
 
-# #plot 3
+    lmic_sub60 = np.round(len(sub60_lmic_f[:,0])/(len(sub60_lmic_f[:,0])+len(over60_lmic_f[:,0]))*100,2)
+    lmic_over60 = np.round(len(over60_lmic_f[:,0])/(len(sub60_lmic_f[:,0])+len(over60_lmic_f[:,0]))*100,2)
 
-# lmic_sub60 = len(sub60_lmic_f[:,0])/(len(sub60_lmic_f[:,0])+len(over60_lmic_f[:,0]))*100
-# lmic_over60 = len(over60_lmic_f[:,0])/(len(sub60_lmic_f[:,0])+len(over60_lmic_f[:,0]))*100
+    hic_sub60 = np.round(len(sub60_hic_f[:,0])/(len(sub60_hic_f[:,0])+len(over60_hic_f[:,0]))*100,2)
+    hic_over60 = np.round(len(over60_hic_f[:,0])/(len(sub60_hic_f[:,0])+len(over60_hic_f[:,0]))*100,2)
 
-# hic_sub60 = len(sub60_hic_f[:,0])/(len(sub60_hic_f[:,0])+len(over60_hic_f[:,0]))*100
-# hic_over60 = len(over60_hic_f[:,0])/(len(sub60_hic_f[:,0])+len(over60_hic_f[:,0]))*100
-
-# table = np.array([[lmic_sub60, lmic_over60], [hic_sub60, hic_over60]])
-
-# oddsr, p_fish = stats.fisher_exact(table, alternative='two-sided')
-
-# if p_fish <0.0001: 
-
-#             p_fish = str('<0.0001')
-
-# else:
-#     p_fish = str(np.round(p_fish,2))
+    table = np.array([[hic_sub60, hic_over60],[lmic_sub60, lmic_over60]])
     
-# SuppFig1C,ax=plt.subplots(figsize=(5,5))
+    oddsr, p_fish = stats.fisher_exact(table, alternative='two-sided')                  
 
-# plt.title('SuppFig1C')
+    cont_stats = {
+                        'p-value' : p_fish,
+                        'OR'       : oddsr
+                 }   
 
-# ax.bar([.2,.3], [hic_sub60,lmic_sub60], color=['blue','red'], alpha = 1, width = .05)
+    if p_fish <0.0001: 
 
-# ax.bar([.2,.3], [hic_over60,lmic_over60], bottom = [hic_sub60,lmic_sub60],color=['blue','red'], alpha = .90, width = .05, hatch = '/')
+                p_fish = str('<0.0001')
 
-# ax.set_ylabel('Percentage (%)')
+    else:
+        p_fish = str(np.round(p_fish,2))
 
-# x = [.2,.3]
-
-# labels = ['<60min','>60min']
-
-# ax.set_xticks(x)
-
-# ax.set_xticklabels(labels)  
-
-# plt.xlim(.1,.4)
-
-# axes_limits = ax.get_ylim()
-
-# ax.plot([x[0],x[1]],[axes_limits[1],axes_limits[1]],color='black', lw=1)
-
-# posOne = x[1]-(x[1]-x[0])+(x[1]-x[0])/4
-
-# font_size = 10
-
-# ax.annotate(p_fish,(posOne,axes_limits[1]+.5),color = 'black',fontsize=font_size)
-
-# plt.show()
-
-# #%%    
-
-
-# SuppFig1D,ax=plt.subplots(figsize=(5,5))
-
-# plt.title('SuppFig1D')
-
-# x = [.2,.3,.4]
-
-# ax.set_xticklabels(labels)
-
-# ax.set_ylabel('BZP-R (%)')
-
-# #plotting original figure with all detail (i.e. stratified across duration of SE, age of participants, number of participants and economic groups)
-    
-# sub30 = np.zeros(shape=(len(data),2))
-# over30sub60 = np.zeros(shape=(len(data),2))
-# over60 = np.zeros(shape=(len(data),2))
-
-# for i in range(len(data)):
-    
-#     group = data.state[i]
-    
-#     episodes = data.episodes[i]
-    
-#     weight = episodes/total_episodes*500
-    
-#     resistance = data.resistance[i]*100
-    
-#     age = data.age[i]
-    
-#     phase = data.phase[i]
-    
-#     marker = 'o'
-    
-#     if age == 'paediatric':
+    cont_table = tabulate({'': ['HIC', 'LMIC'], 'SE <60min': [(str(hic_sub60)+'%'), (str(lmic_sub60)+'%')], 'SE >60min': [(str(hic_over60)+'%'), (str(lmic_over60)+'%')]}, headers="keys", tablefmt='fancy_grid')
         
-#         color = 'magenta'
+    SuppFig1C,ax=plt.subplots(figsize=(5,5))
 
-#     elif age == 'adult':
-        
-#         color = 'orange'
+    plt.title('SuppFig1C')
 
-#     elif age == 'both':
-        
-#         color = 'black'           
+    ax.bar([.2,.3], [hic_sub60,lmic_sub60], color=['blue','red'], width = .05, alpha=.25)
 
-#     if phase == '10-30min' and group == 'high-income':
-        
-#         sub30[i,0] = resistance
-        
-#         sub30[i,1] = episodes
-        
-#         ax.plot(x[0]-.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)
-#         ax.plot(x[0]-.015, resistance,markersize=weight, color = 'blue', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)
-    
-#     elif phase == '10-30min' and group == 'low-middle-income':
-        
-#         sub30[i,0] = resistance
-        
-#         sub30[i,1] = episodes
-        
-#         ax.plot(x[0]+.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)
-#         ax.plot(x[0]+.015, resistance,markersize=weight, color = 'red', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)
-    
-#     elif phase == '31-60min' and group == 'high-income':
-        
-#         over30sub60[i,0] = resistance
-        
-#         over30sub60[i,1] = episodes
-        
-#         ax.plot(x[1]-.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2,alpha=.2)        
-#         ax.plot(x[1]-.015, resistance,markersize=weight, color = 'blue', marker = marker, markeredgecolor = color, markeredgewidth=2,alpha=.2)        
+    ax.bar([.2,.3], [hic_over60,lmic_over60], bottom = [hic_sub60,lmic_sub60],color=['white','white'], width = .05)
 
-#     elif phase == '31-60min' and group == 'low-middle-income':
+    ax.bar([.2,.3], [hic_over60,lmic_over60], bottom = [hic_sub60,lmic_sub60],color=['blue','red'], width = .05)
+
+    ax.set_ylabel('Proortion of studies (%)')
+
+    x = [.2,.3]
+
+    labels = ['HIC','LMIC']
+
+    ax.set_xticks(x)
+
+    ax.set_xticklabels(labels)  
+
+    plt.xlim(.1,.4)
+
+    axes_limits = ax.get_ylim()
+
+    ax.plot([x[0],x[1]],[axes_limits[1],axes_limits[1]],color='black', lw=1)
+
+    posOne = x[1]-(x[1]-x[0])+(x[1]-x[0])/4
+
+    font_size = 10
+
+    ax.annotate(p_fish,(posOne,axes_limits[1]+.5),color = 'black',fontsize=font_size)
+
+    ax.plot(.110,105,markersize=10,marker='s',color='black', alpha=.25)
+    plt.text(.120, 103, '<60min', fontsize=12)
+
+    ax.plot(.110, 100,markersize=10,marker='s',color='black')
+    plt.text(.120, 98, '>60min', fontsize=12)
+
+    plt.close(SuppFig1C)
+
+    #%%    
+    SuppFig1D,ax=plt.subplots(figsize=(5,5))
+
+    plt.title('SuppFig1D')
+
+    x = [.2,.3,.4]
+
+    ax.set_xticklabels(labels)
+
+    ax.set_ylabel('BZP-R (%)')
+
+#%%
+#plotting original figure with all detail (i.e. stratified across duration of SE, age of participants, number of participants and economic groups)
         
-#         over30sub60[i,0] = resistance
+    sub30 = np.zeros(shape=(len(data),2))
+    over30sub60 = np.zeros(shape=(len(data),2))
+    over60 = np.zeros(shape=(len(data),2))
+
+    total_episodes = data['episodes'].sum()
+
+    for i in range(len(data)):
         
-#         over30sub60[i,1] = episodes
+        group = data.state[i]
         
-#         ax.plot(x[1]+.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2,alpha=.2)               
-#         ax.plot(x[1]+.015, resistance,markersize=weight, color = 'red', marker = marker, markeredgecolor = color, markeredgewidth=2,alpha=.2)               
-               
-#     elif phase == '>60min' and group == 'high-income':
+        episodes = data.episodes[i]
         
-#         over60[i,0] = resistance
+        weight = episodes/total_episodes*500
         
-#         over60[i,1] = episodes
+        resistance = data.resistance[i]*100
         
-#         ax.plot(x[2]-.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
-#         ax.plot(x[2]-.015, resistance,markersize=weight, color = 'blue', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
-
-#     elif phase == '>60min' and group == 'low-middle-income':
+        age = data.age[i]
         
-#         over60[i,0] = resistance
+        phase = data.phase[i]
         
-#         over60[i,1] = episodes
+        marker = 'o'
         
-#         ax.plot(x[2]+.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
-#         ax.plot(x[2]+.015, resistance,markersize=weight, color = 'red', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
+        if age == 'paediatric':
+            
+            color = 'magenta'
+
+        elif age == 'adult':
+            
+            color = 'orange'
+
+        elif age == 'both':
+            
+            color = 'black'           
+
+        if phase == '10-30min' and group == 'HIC':
+            
+            sub30[i,0] = resistance
+            
+            sub30[i,1] = episodes
+            
+            ax.plot(x[0]-.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)
+            ax.plot(x[0]-.015, resistance,markersize=weight, color = 'blue', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)
         
+        elif phase == '10-30min' and group == 'LMIC':
+            
+            sub30[i,0] = resistance
+            
+            sub30[i,1] = episodes
+            
+            ax.plot(x[0]+.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)
+            ax.plot(x[0]+.015, resistance,markersize=weight, color = 'red', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)
+        
+        elif phase == '31-60min' and group == 'HIC':
+            
+            over30sub60[i,0] = resistance
+            
+            over30sub60[i,1] = episodes
+            
+            ax.plot(x[1]-.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2,alpha=.2)        
+            ax.plot(x[1]-.015, resistance,markersize=weight, color = 'blue', marker = marker, markeredgecolor = color, markeredgewidth=2,alpha=.2)        
 
-# ax.plot(x[0],mean_diff_sub30, markersize=15, color='purple', marker = 'o')
-# ax.plot(x[1],mean_diff_over30sub60, markersize=15, color='purple', marker = 'o')
-# ax.plot(x[2],mean_diff_over60, markersize=15, color='purple', marker = 'o')
+        elif phase == '31-60min' and group == 'LMIC':
+            
+            over30sub60[i,0] = resistance
+            
+            over30sub60[i,1] = episodes
+            
+            ax.plot(x[1]+.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2,alpha=.2)               
+            ax.plot(x[1]+.015, resistance,markersize=weight, color = 'red', marker = marker, markeredgecolor = color, markeredgewidth=2,alpha=.2)               
+                
+        elif phase == '>60min' and group == 'HIC':
+            
+            over60[i,0] = resistance
+            
+            over60[i,1] = episodes
+            
+            ax.plot(x[2]-.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
+            ax.plot(x[2]-.015, resistance,markersize=weight, color = 'blue', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
 
-# plt.xlim(.1,.5)
+        elif phase == '>60min' and group == 'LMIC':
+            
+            over60[i,0] = resistance
+            
+            over60[i,1] = episodes
+            
+            ax.plot(x[2]+.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
+            ax.plot(x[2]+.015, resistance,markersize=weight, color = 'red', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
+            
 
-# ax.set_xticks(x)
+    ax.plot(x[0],mean_diff_sub30, markersize=15, color='purple', marker = 'o')
+    ax.plot(x[1],mean_diff_over30sub60, markersize=15, color='purple', marker = 'o')
+    ax.plot(x[2],mean_diff_over60, markersize=15, color='purple', marker = 'o')
 
-# labels = ['10-30min','31-60min','>60min']
+    plt.xlim(.1,.5)
 
-# ax.set_xticklabels(labels)
+    ax.set_xticks(x)
 
-# ax.set_ylabel('BZP-R (%)')
+    labels = ['10-30min','31-60min','>60min']
 
-# ax.plot(.125,80,markersize=10,marker='o',color='white',markeredgecolor = 'orange')
-# plt.text(.140, 78, 'Adult only', fontsize=12)
+    ax.set_xticklabels(labels)
 
-# ax.plot(.125,75,markersize=10,marker='o',color='white',markeredgecolor = 'magenta')
-# plt.text(.140, 73, 'Paediatric only', fontsize=12)
+    ax.set_ylabel('BZP-R (%)')
 
-# ax.plot(.125,70,markersize=10,marker='o',color='white',markeredgecolor = 'black')
-# plt.text(.140, 68, 'Mixed', fontsize=12)
+    ax.plot(.125,100,markersize=10,marker='_',color='white',markeredgecolor = 'orange')
+    plt.text(.140, 98, 'Adult only', fontsize=12)
 
-# ax.plot(.125,65,markersize=10,marker='o',color='purple')
+    ax.plot(.125,95,markersize=10,marker='_',color='white',markeredgecolor = 'magenta')
+    plt.text(.140, 93, 'Paediatric only', fontsize=12)
 
-# plt.text(.140, 63, 'Mean diff.', fontsize=12)
+    ax.plot(.125,90,markersize=10,marker='o',color='white',markeredgecolor = 'black')
+    plt.text(.140, 88, 'Mixed', fontsize=12)
 
-# ax.plot(.125,60,markersize=10,marker='_',color='blue')
-# plt.text(.140, 58, 'HIC', fontsize=12)
+    ax.plot(.125,85,markersize=10,marker='o',color='purple')
+    plt.text(.140, 83, 'Mean diff.', fontsize=12)
 
-# ax.plot(.125,55,markersize=10,marker='_',color='red')
-# plt.text(.140, 53, 'LMIC', fontsize=12)
+    ax.plot(.125,80,markersize=10,marker='o',color='blue')
+    plt.text(.140, 78, 'HIC', fontsize=12)
 
+    ax.plot(.125,75,markersize=10,marker='o',color='red')
+    plt.text(.140, 73, 'LMIC', fontsize=12)
 
+    plt.close(SuppFig1D)
+
+    return(data_hic, data_lmic, cont_table, cont_stats, SuppFig1B, SuppFig1C, SuppFig1D)
