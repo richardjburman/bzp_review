@@ -8,6 +8,8 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pylab as plt
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
 import seaborn as sns
 from scipy import stats
 from tabulate import tabulate
@@ -99,26 +101,26 @@ def fig1A(data):
         p_value = stats.mannwhitneyu(lmic_final[:,0],hic_final[:,0])
         test = 'mann-whitney'   
 
-    mean_diff_hic = np.sum(lmic_final[:,2],axis=0)/np.sum(lmic_final[:,1],axis=0)*100
+    mean_diff_hic = np.sum(lmic_final[:,2],axis=0)/np.sum(lmic_final[:,1],axis=0)
     
-    mean_diff_lmic = np.sum(lmic_final[:,2],axis=0)/np.sum(lmic_final[:,1],axis=0)*100
+    mean_diff_lmic = np.sum(lmic_final[:,2],axis=0)/np.sum(lmic_final[:,1],axis=0)
 
-    mean_diff_total = np.sum(total[:,2],axis=0)/np.sum(total[:,1],axis=0)*100 
+    mean_diff_total = np.sum(total[:,2],axis=0)/np.sum(total[:,1],axis=0)
 
     hic_data = hic_final[:,0]
     hic_weights = hic_final[:,1]
 
-    weighted_stats_hic = DescrStatsW(hic_data, hic_weights, ddof=1)
+    weighted_stats_hic = DescrStatsW(hic_data, hic_weights, ddof=0)
 
     lmic_data = lmic_final[:,0]
     lmic_weights = lmic_final[:,1]
 
-    weighted_stats_lmic = DescrStatsW(lmic_data, lmic_weights, ddof=1)
+    weighted_stats_lmic = DescrStatsW(lmic_data, lmic_weights, ddof=0)
 
-    total_data = lmic_final[:,0]
-    total_weights = lmic_final[:,1]
+    total_data = total[:,0]
+    total_weights = total[:,1]
 
-    weighted_stats_total = DescrStatsW(total_data, total_weights, ddof=1)
+    weighted_stats_total = DescrStatsW(total_data, total_weights, ddof=0)
 
     nonweighted_stats = {
                                 'Mean HIC' : mean_hic,
@@ -257,9 +259,13 @@ def fig1A(data):
 
     ax.set_ylabel('BZP-R (%)')
 
-    ax.plot(x[0],weighted_stats_hic.mean, markersize=15, color='blue', marker = 'o')
-    ax.plot(x[1],weighted_stats_lmic.mean, markersize=15, color='red', marker = 'o')
-    ax.plot(.25,weighted_stats_total.mean, markersize=15, color='purple', marker = 'o')
+    ax.plot(x[0],weighted_stats_hic.mean, markersize=15, color='white', markeredgecolor = 'blue', marker = 'o')
+    ax.plot(x[1],weighted_stats_lmic.mean, markersize=15, color='white', markeredgecolor = 'red', marker = 'o')
+    ax.plot(.25,weighted_stats_total.mean, markersize=15, color='white', markeredgecolor = 'purple', marker = 'o')
+
+    ax.plot([x[0],x[0]],[weighted_stats_hic.mean-weighted_stats_hic.std_mean,weighted_stats_hic.mean+weighted_stats_hic.std_mean],color='blue', lw=3)
+    ax.plot([x[1],x[1]],[weighted_stats_lmic.mean-weighted_stats_lmic.std_mean,weighted_stats_lmic.mean+weighted_stats_lmic.std_mean],color='red', lw=3)
+    ax.plot([.25,.25],[weighted_stats_total.mean-weighted_stats_total.std_mean,weighted_stats_total.mean+weighted_stats_total.std_mean],color='purple', lw=3)
 
     ax.plot(.115,88,markersize=10,marker='o',color='blue',alpha=.2)
     plt.text(.130, 86, 'Adult only', fontsize=12)
@@ -270,8 +276,8 @@ def fig1A(data):
     ax.plot(.115,78,markersize=10,marker='o',color='magenta',alpha=.2)
     plt.text(.130, 76, 'Paediatric only', fontsize=12)
 
-    ax.plot(.115,73,markersize=10,marker='o',color='purple')
-    plt.text(.130, 71, 'Mean diff.', fontsize=12)
+    ax.plot(.115,73,markersize=10,marker='o',color='white', markeredgecolor = 'purple')
+    plt.text(.130, 71, 'Weighted mean', fontsize=12)
 
     plt.close(SuppFig1A)
 
@@ -303,7 +309,7 @@ def fig1B(data):
         
         weight = episodes/total_episodes*500
         
-        resistance = data.resistance[i]*100
+        resistance = data.resistance[i]
         
         age = data.age[i]
         
@@ -391,12 +397,16 @@ def fig1B(data):
     #calculating mean across phases (%)
 
     mean_sub30 = np.mean(sub30_f[:,0])
+    sem_sub30 = stats.sem(sub30_f[:,0])
 
     mean_over30sub60 = np.mean(over30sub60_f[:,0])
+    sem_over30sub60 = stats.sem(over30sub60_f[:,0])
 
     mean_sub60 = np.mean(sub60_f[:,0])
+    sem_sub60 = stats.sem(sub60_f[:,0])
 
     mean_over60 = np.mean(over60_f[:,0])
+    sem_over60 = stats.sem(over60_f[:,0])
 
     #performaing comparative statistics on <60 and >60min groups (i.e. sub60 vs over60)
 
@@ -413,15 +423,53 @@ def fig1B(data):
         p_value = stats.mannwhitneyu(sub60_f[:,0],over60_f[:,0])
         test = 'mann-whitney'   
 
-    #calculating weighted mean across phases (%)
+    nonweighted_stats_phases = {
 
-    mean_diff_sub30 = np.sum(sub30_f[:,2],axis=0)/np.sum(sub30_f[:,1],axis=0)
+                                    'Mean 10-30min' :  mean_sub30,
+                                    'SEM 10-30min': sem_sub30,
+                                    'Mean 31-60min' : mean_over30sub60,
+                                    'SEM LMIC' : sem_over30sub60,
+                                    'Mean <60min' : mean_sub60,
+                                    'SEM <60min' : sem_sub60,
+                                    'Mean >60min' : mean_over60,
+                                    'SEM >60min' : sem_over60,
+                                    'p-value' : p_value,
+                                    'test' : test
+                        
+                               }
 
-    mean_diff_over30sub60 = np.sum(over30sub60_f[:,2],axis=0)/np.sum(over30sub60_f[:,1],axis=0)
+    sub30_data = sub30_f[:,0]
+    sub30_weights = sub30_f[:,1]
 
-    mean_diff_sub60 = np.sum(sub60_f[:,2],axis=0)/np.sum(sub60_f[:,1],axis=0)
+    weighted_stats_sub30 = DescrStatsW(sub30_data, sub30_weights, ddof=0)
 
-    mean_diff_over60 = np.sum(over60_f[:,2],axis=0)/np.sum(over60_f[:,1],axis=0)
+    over30sub60_data = over30sub60_f[:,0]
+    over30sub60_weights = over30sub60_f[:,1]
+
+    weighted_stats_over30sub60 = DescrStatsW(over30sub60_data, over30sub60_weights, ddof=0)
+
+    sub60_data = sub60_f[:,0]
+    sub60_weights = sub60_f[:,1]
+
+    weighted_stats_sub60 = DescrStatsW(sub60_data, sub60_weights, ddof=0)
+
+    over60_data = over60_f[:,0]
+    over60_weights = over60_f[:,1]
+
+    weighted_stats_over60 = DescrStatsW(over60_data, over60_weights, ddof=0)
+
+    weighted_stats_phases = {
+
+                    'Weighted Mean 10-30min' : weighted_stats_sub30.mean,
+                    'Weighted SEM 10-30min': weighted_stats_sub30.std_mean,
+                    'Weighted Mean 31-60min' : weighted_stats_over30sub60.mean,
+                    'Weighted SEM 31-60min' : weighted_stats_over30sub60.std_mean,
+                    'Weighted Mean <60min' : weighted_stats_sub60.mean,
+                    'Weighted SEM <60min' : weighted_stats_sub60.std_mean,
+                    'Weighted Mean >60min' : weighted_stats_over60.mean,
+                    'Weighted SEM >60min' : weighted_stats_over60.std_mean,                  
+
+                }
 
     Fig1B,ax=plt.subplots(figsize=(5,5))
 
@@ -452,9 +500,12 @@ def fig1B(data):
             color = 'purple'
 
             ax.plot(x[1], resistance,markersize=weight, color = color, marker = marker, alpha=.2)
-            
-    ax.plot(x[0],mean_sub60, markersize=15, color='purple', marker = 'o')
-    ax.plot(x[1],mean_over60, markersize=15, color='purple', marker = 'o')
+
+    ax.plot([x[0],x[0]],[mean_sub60-sem_sub60,mean_sub60+sem_sub60],color='purple', lw=3)
+    ax.plot([x[1],x[1]],[mean_over60-sem_over60,mean_over60+sem_over60],color='purple', lw=3)
+
+    ax.plot(x[0],mean_sub60, markersize=15, color='white', markeredgecolor = 'purple', marker = 'o')
+    ax.plot(x[1],mean_over60, markersize=15, color='white', markeredgecolor = 'purple', marker = 'o')
 
     plt.xlim(.1,.4)
 
@@ -472,7 +523,7 @@ def fig1B(data):
 
     posOne = x[1]-(x[1]-x[0])+(x[1]-x[0])/4
 
-    p = 'p = ' + str(np.round(p_value[1],2))
+    p = 'p = ' + str(np.round(p_value[1],4))
 
     font_size = 10
 
@@ -480,22 +531,24 @@ def fig1B(data):
 
     plt.close(Fig1B)
 
-    weighted_means_phases = {
-                                'Weighted mean 10-30min' : mean_diff_sub30,
-                                'Weighted mean 31-60min' : mean_diff_over30sub60, 
-                                'Weighted mean >60min'   : mean_diff_over60,
-                            }
-
-    return(mean_sub30,mean_over30sub60,mean_sub60,mean_over60,p_value,test,weighted_means_phases,Fig1B)
+    return(Fig1B, nonweighted_stats_phases, weighted_stats_phases)
 
 #%%
 #function to generate supplementary figures to complement Figure 1B
 
-def suppfigs(data, p_value, weighted_means_phases):
+def suppfigs(data, p_value, weighted_stats_phases):
 
-    mean_diff_sub30 = weighted_means_phases['Weighted mean 10-30min']
-    mean_diff_over30sub60 = weighted_means_phases['Weighted mean 31-60min']
-    mean_diff_over60 = weighted_means_phases['Weighted mean >60min']
+    mean_diff_sub30 = weighted_stats_phases['Weighted Mean 10-30min']
+    sem_diff_sub30 = weighted_stats_phases['Weighted SEM 10-30min']
+
+    mean_diff_over30sub60 = weighted_stats_phases ['Weighted Mean 31-60min']
+    sem_diff_over30sub60 = weighted_stats_phases['Weighted SEM 31-60min']
+
+    mean_diff_sub60 = weighted_stats_phases ['Weighted Mean <60min']
+    sem_diff_sub60 = weighted_stats_phases['Weighted SEM <60min']
+
+    mean_diff_over60 = weighted_stats_phases ['Weighted Mean >60min']
+    sem_diff_over60 = weighted_stats_phases['Weighted SEM >60min']
 
     #hic
     sub30_hic = np.zeros(shape=(len(data),2))
@@ -509,7 +562,7 @@ def suppfigs(data, p_value, weighted_means_phases):
         
         episodes = data.episodes[i]
         
-        resistance = data.resistance[i]*100
+        resistance = data.resistance[i]
         
         phase = data.phase[i]
                 
@@ -595,12 +648,16 @@ def suppfigs(data, p_value, weighted_means_phases):
     #calculating mean across phases (%)
 
     mean_sub30_hic = np.mean(sub30_hic_f[:,0])
+    sem_sub30_hic = stats.sem(sub30_hic_f[:,0])
 
     mean_over30sub60_hic = np.mean(over30sub60_hic_f[:,0])
+    sem_over30sub60_hic = stats.sem(over30sub60_hic_f[:,0])
 
     mean_sub60_hic = np.mean(sub60_hic_f[:,0])
+    sem_sub60_hic = stats.sem(sub60_hic_f[:,0])
 
     mean_over60_hic = np.mean(over60_hic_f[:,0])
+    sem_over60_hic = stats.sem(over60_hic_f[:,0])
 
     #performaing comparative statistics on <60 and >60min groups (i.e. sub60 vs over60)
 
@@ -619,13 +676,25 @@ def suppfigs(data, p_value, weighted_means_phases):
 
     #calculating weighted mean across phases (%)
 
-    mean_diff_sub30_hic = np.sum(sub30_hic_f[:,2],axis=0)/np.sum(sub30_hic_f[:,1],axis=0)
+    sub30_hic_data = sub30_hic_f[:,0]
+    sub30_hic_weights = sub30_hic_f[:,1]
 
-    mean_diff_over30sub60_hic = np.sum(over30sub60_hic_f[:,2],axis=0)/np.sum(over30sub60_hic_f[:,1],axis=0)
+    weighted_stats_hic_sub30 = DescrStatsW(sub30_hic_data, sub30_hic_weights, ddof=0)
 
-    mean_diff_sub60_hic = np.sum(sub60_hic_f[:,2],axis=0)/np.sum(sub60_hic_f[:,1],axis=0)
+    over30sub60_hic_data = over30sub60_hic_f[:,0]
+    over30sub60_hic_weights = over30sub60_hic_f[:,1]
 
-    mean_diff_over60_hic = np.sum(over60_hic_f[:,2],axis=0)/np.sum(over60_hic_f[:,1],axis=0)
+    weighted_stats_hic_over30sub60 = DescrStatsW(over30sub60_hic_data, over30sub60_hic_weights, ddof=0)
+
+    sub60_hic_data = sub60_hic_f[:,0]
+    sub60_hic_weights = sub60_hic_f[:,1]
+
+    weighted_stats_hic_sub60 = DescrStatsW(sub60_hic_data, sub60_hic_weights, ddof=0)
+
+    over60_hic_data = over60_hic_f[:,0]
+    over60_hic_weights = over60_hic_f[:,1]
+
+    weighted_stats_hic_over60 = DescrStatsW(over60_hic_data, over60_hic_weights, ddof=0)
 
     #lmic
     sub30_lmic = np.zeros(shape=(len(data),2))
@@ -639,7 +708,7 @@ def suppfigs(data, p_value, weighted_means_phases):
         
         episodes = data.episodes[i]
         
-        resistance = data.resistance[i]*100
+        resistance = data.resistance[i]
         
         phase = data.phase[i]
                 
@@ -725,12 +794,16 @@ def suppfigs(data, p_value, weighted_means_phases):
     #calculating mean across phases (%)
 
     mean_sub30_lmic = np.mean(sub30_lmic_f[:,0])
+    sem_sub30_lmic = stats.sem(sub30_lmic_f[:,0])
 
     mean_over30sub60_lmic = np.mean(over30sub60_lmic_f[:,0])
+    sem_over30sub60_lmic = stats.sem(over30sub60_lmic_f[:,0])
 
     mean_sub60_lmic = np.mean(sub60_lmic_f[:,0])
+    sem_sub60_lmic = stats.sem(sub60_lmic_f[:,0])
 
     mean_over60_lmic = np.mean(over60_lmic_f[:,0])
+    sem_over60_lmic = stats.sem(over60_lmic_f[:,0])
 
     #performaing comparative statistics on <60 and >60min groups (i.e. sub60 vs over60)
 
@@ -749,13 +822,74 @@ def suppfigs(data, p_value, weighted_means_phases):
 
     #calculating weighted mean across phases (%)
 
-    mean_diff_sub30_lmic = np.sum(sub30_lmic_f[:,2],axis=0)/np.sum(sub30_lmic_f[:,1],axis=0)
+    sub30_lmic_data = sub30_lmic_f[:,0]
+    sub30_lmic_weights = sub30_lmic_f[:,1]
 
-    mean_diff_over30sub60_lmic = np.sum(over30sub60_lmic_f[:,2],axis=0)/np.sum(over30sub60_lmic_f[:,1],axis=0)
+    weighted_stats_lmic_sub30 = DescrStatsW(sub30_lmic_data, sub30_lmic_weights, ddof=0)
 
-    mean_diff_sub60_lmic = np.sum(sub60_lmic_f[:,2],axis=0)/np.sum(sub60_lmic_f[:,1],axis=0)
+    over30sub60_lmic_data = over30sub60_lmic_f[:,0]
+    over30sub60_lmic_weights = over30sub60_lmic_f[:,1]
 
-    mean_diff_over60_lmic = np.sum(over60_lmic_f[:,2],axis=0)/np.sum(over60_lmic_f[:,1],axis=0)
+    weighted_stats_lmic_over30sub60 = DescrStatsW(over30sub60_lmic_data, over30sub60_lmic_weights, ddof=0)
+
+    sub60_lmic_data = sub60_lmic_f[:,0]
+    sub60_lmic_weights = sub60_lmic_f[:,1]
+
+    weighted_stats_lmic_sub60 = DescrStatsW(sub60_lmic_data, sub60_lmic_weights, ddof=0)
+
+    over60_lmic_data = over60_lmic_f[:,0]
+    over60_lmic_weights = over60_lmic_f[:,1]
+
+    weighted_stats_lmic_over60 = DescrStatsW(over60_lmic_data, over60_lmic_weights, ddof=0)
+
+    nonweighted_stats_phases_eco = {
+
+                                    'HIC Mean 10-30min' :  mean_sub30_hic,
+                                    'HIC SEM 10-30min': sem_sub30_hic,
+                                    'HIC Mean 31-60min' : mean_over30sub60_hic,
+                                    'HIC SEM 31-60min' : sem_over30sub60_hic,
+                                    'HIC Mean <60min' : mean_sub60_hic,
+                                    'HIC SEM <60min' : sem_sub60_hic,
+                                    'HIC Mean >60min' : mean_over60_hic,
+                                    'HIC SEM >60min' : sem_over60_hic,
+                                    'p-value HIC' :  p_value_hic,
+                                    'test HIC' :  test_hic,
+
+                                    'LMIC Mean 10-30min' :  mean_sub30_lmic,
+                                    'LMIC SEM 10-30min': sem_sub30_lmic,
+                                    'LMIC Mean 31-60min' : mean_over30sub60_lmic,
+                                    'LMIC SEM 31-60min' : sem_over30sub60_lmic,
+                                    'LMIC Mean <60min' : mean_sub60_lmic,
+                                    'LMIC SEM <60min' : sem_sub60_lmic,
+                                    'LMIC Mean >60min' : mean_over60_lmic,
+                                    'LMIC SEM >60min' : sem_over60_lmic,
+                                    'p-value LMIC' :  p_value_lmic,
+                                    'test LMIC' :  test_lmic     
+                        
+                                    }
+
+    weighted_stats_phases_eco = {
+
+                    'HIC Weighted Mean 10-30min' : weighted_stats_hic_sub30.mean,
+                    'HIC Weighted SEM 10-30min': weighted_stats_hic_sub30.std_mean,
+                    'HIC Weighted Mean 31-60min' : weighted_stats_hic_over30sub60.mean,
+                    'HIC Weighted SEM 31-60min' : weighted_stats_hic_over30sub60.std_mean,
+                    'HIC Weighted Mean <60min' : weighted_stats_hic_sub60.mean,
+                    'HIC Weighted SEM <60min' : weighted_stats_hic_sub60.std_mean,
+                    'HIC Weighted Mean >60min' : weighted_stats_hic_over60.mean,
+                    'HIC Weighted SEM >60min' : weighted_stats_hic_over60.std_mean,
+
+
+                    'LMIC Weighted Mean 10-30min' : weighted_stats_lmic_sub30.mean,
+                    'LMIC Weighted SEM 10-30min': weighted_stats_lmic_sub30.std_mean,
+                    'LMIC Weighted Mean 31-60min' : weighted_stats_lmic_over30sub60.mean,
+                    'LMIC Weighted SEM 31-60min' : weighted_stats_lmic_over30sub60.std_mean,
+                    'LMIC Weighted Mean <60min' : weighted_stats_lmic_sub60.mean,
+                    'LMIC Weighted SEM <60min' : weighted_stats_lmic_sub60.std_mean,
+                    'LMIC Weighted Mean >60min' : weighted_stats_lmic_over60.mean,
+                    'LMIC Weighted SEM >60min' : weighted_stats_lmic_over60.std_mean,
+             
+                                 }  
 
     #plotting figure
 
@@ -812,12 +946,18 @@ def suppfigs(data, p_value, weighted_means_phases):
             color = 'red'
 
             ax.plot(x[1]+.01, resistance,markersize=weight, color = color, marker = marker, alpha=.2)  
-            
-    ax.plot(x[0]-.01,mean_sub60_hic, markersize=15, color='blue', marker = 'o')
-    ax.plot(x[1]-.01,mean_over60_hic, markersize=15, color='blue', marker = 'o')
 
-    ax.plot(x[0]+.01,mean_sub60_lmic, markersize=15, color='red', marker = 'o')
-    ax.plot(x[1]+.01,mean_over60_lmic, markersize=15, color='red', marker = 'o')
+    ax.plot([x[0]-.01,x[0]-.01],[mean_sub60_hic-sem_sub60_hic,mean_sub60_hic+sem_sub60_hic],color='blue', lw=3)
+    ax.plot([x[1]-.01,x[1]-.01],[mean_over60_hic-sem_over60_hic,mean_over60_hic+sem_over60_hic],color='blue', lw=3)
+
+    ax.plot([x[0]+.01,x[0]+.01],[mean_sub60_lmic-sem_sub60_lmic,mean_sub60_lmic+sem_sub60_lmic],color='red', lw=3)
+    ax.plot([x[1]+.01,x[1]+.01],[mean_over60_lmic-sem_over60_lmic,mean_over60_lmic+sem_over60_lmic],color='red', lw=3)
+
+    ax.plot(x[0]-.01,mean_sub60_hic, markersize=15, color='white', markeredgecolor = 'blue', marker = 'o')
+    ax.plot(x[1]-.01,mean_over60_hic, markersize=15, color='white', markeredgecolor = 'blue', marker = 'o')
+
+    ax.plot(x[0]+.01,mean_sub60_lmic, markersize=15, color='white', markeredgecolor = 'red', marker = 'o')
+    ax.plot(x[1]+.01,mean_over60_lmic, markersize=15, color='white', markeredgecolor = 'red', marker = 'o')
 
     plt.xlim(.1,.4)
 
@@ -851,33 +991,14 @@ def suppfigs(data, p_value, weighted_means_phases):
 
     plt.close(SuppFig1B)
 
-    data_hic = {
-                            'Mean 10-30min HIC'  : mean_sub30_hic,
-                            'Mean 31-60min HIC'  : mean_over30sub60_hic, 
-                            'Mean <60min HIC'    : mean_sub60_hic,
-                            'Mean >60min HIC'    : mean_over60_hic,
-                            'p-value HIC'        : p_value_hic,
-                            'Test HIC'           : test_hic
-                            }
-
-    data_lmic = {
-                            'Mean 10-30min LMIC' : mean_sub30_lmic,
-                            'Mean 31-60min LMIC' : mean_over30sub60_lmic, 
-                            'Mean <60min LMIC'   : mean_sub60_lmic,
-                            'Mean >60min LMIC'   : mean_over60_lmic,
-                            'p-value LMIC'       : p_value_lmic,
-                            'Test LMIC'          : test_lmic
-                            }
-
-
 #%%
 #contingency table
 
-    lmic_sub60 = np.round(len(sub60_lmic_f[:,0])/(len(sub60_lmic_f[:,0])+len(over60_lmic_f[:,0]))*100,2)
-    lmic_over60 = np.round(len(over60_lmic_f[:,0])/(len(sub60_lmic_f[:,0])+len(over60_lmic_f[:,0]))*100,2)
+    lmic_sub60 = len(sub60_lmic_f[:,0])
+    lmic_over60 = len(over60_lmic_f[:,0])
 
-    hic_sub60 = np.round(len(sub60_hic_f[:,0])/(len(sub60_hic_f[:,0])+len(over60_hic_f[:,0]))*100,2)
-    hic_over60 = np.round(len(over60_hic_f[:,0])/(len(sub60_hic_f[:,0])+len(over60_hic_f[:,0]))*100,2)
+    hic_sub60 = len(sub60_hic_f[:,0])
+    hic_over60 = len(over60_hic_f[:,0])
 
     table = np.array([[hic_sub60, hic_over60],[lmic_sub60, lmic_over60]])
     
@@ -895,19 +1016,27 @@ def suppfigs(data, p_value, weighted_means_phases):
     else:
         p_fish = str(np.round(p_fish,2))
 
-    cont_table = tabulate({'': ['HIC', 'LMIC'], 'SE <60min': [(str(hic_sub60)+'%'), (str(lmic_sub60)+'%')], 'SE >60min': [(str(hic_over60)+'%'), (str(lmic_over60)+'%')]}, headers="keys", tablefmt='fancy_grid')
-        
-    SuppFig1C,ax=plt.subplots(figsize=(5,5))
+    cont_table = tabulate({'': ['HIC', 'LMIC'], 'SE <60min': [(str(hic_sub60)), (str(lmic_sub60))], 'SE >60min': [(str(hic_over60)), (str(lmic_over60))]}, headers="keys", tablefmt='fancy_grid')
 
-    plt.title('SuppFig1C')
+    lmic_sub60_perc = np.round(len(sub60_lmic_f[:,0])/(len(sub60_lmic_f[:,0])+len(over60_lmic_f[:,0]))*100,2)
+    lmic_over60_perc = np.round(len(over60_lmic_f[:,0])/(len(sub60_lmic_f[:,0])+len(over60_lmic_f[:,0]))*100,2)
 
-    ax.bar([.2,.3], [hic_sub60,lmic_sub60], color=['blue','red'], width = .05, alpha=.25)
+    hic_sub60_perc = np.round(len(sub60_hic_f[:,0])/(len(sub60_hic_f[:,0])+len(over60_hic_f[:,0]))*100,2)
+    hic_over60_perc = np.round(len(over60_hic_f[:,0])/(len(sub60_hic_f[:,0])+len(over60_hic_f[:,0]))*100,2)
 
-    ax.bar([.2,.3], [hic_over60,lmic_over60], bottom = [hic_sub60,lmic_sub60],color=['white','white'], width = .05)
+    perc_table = tabulate({'': ['HIC', 'LMIC'], 'SE <60min': [(str(hic_sub60_perc)+'%'), (str(lmic_sub60_perc)+'%')], 'SE >60min': [(str(hic_over60_perc)+'%'), (str(lmic_over60_perc)+'%')]}, headers="keys", tablefmt='fancy_grid')
+    
+    Fig1C,ax=plt.subplots(figsize=(5,5))
 
-    ax.bar([.2,.3], [hic_over60,lmic_over60], bottom = [hic_sub60,lmic_sub60],color=['blue','red'], width = .05)
+    plt.title('Fig1C')
 
-    ax.set_ylabel('Proortion of studies (%)')
+    ax.bar([.2,.3], [hic_sub60_perc,lmic_sub60_perc], color=['blue','red'], width = .05, alpha=.25)
+
+    ax.bar([.2,.3], [hic_over60_perc,lmic_over60_perc], bottom = [hic_sub60_perc,lmic_sub60_perc],color=['white','white'], width = .05)
+
+    ax.bar([.2,.3], [hic_over60_perc,lmic_over60_perc], bottom = [hic_sub60_perc,lmic_sub60_perc],color=['blue','red'], width = .05)
+
+    ax.set_ylabel('Proportion of studies (%)')
 
     x = [.2,.3]
 
@@ -927,6 +1056,8 @@ def suppfigs(data, p_value, weighted_means_phases):
 
     font_size = 10
 
+    p_fish = 'p = ' + p_fish
+
     ax.annotate(p_fish,(posOne,axes_limits[1]+.5),color = 'black',fontsize=font_size)
 
     ax.plot(.110,105,markersize=10,marker='s',color='black', alpha=.25)
@@ -935,12 +1066,12 @@ def suppfigs(data, p_value, weighted_means_phases):
     ax.plot(.110, 100,markersize=10,marker='s',color='black')
     plt.text(.120, 98, '>60min', fontsize=12)
 
-    plt.close(SuppFig1C)
+    plt.close(Fig1C)
 
     #%%    
-    SuppFig1D,ax=plt.subplots(figsize=(5,5))
+    SuppFig1C,ax=plt.subplots(figsize=(5,5))
 
-    plt.title('SuppFig1D')
+    plt.title('SuppFig1C')
 
     x = [.2,.3,.4]
 
@@ -965,7 +1096,7 @@ def suppfigs(data, p_value, weighted_means_phases):
         
         weight = episodes/total_episodes*500
         
-        resistance = data.resistance[i]*100
+        resistance = data.resistance[i]
         
         age = data.age[i]
         
@@ -1039,12 +1170,15 @@ def suppfigs(data, p_value, weighted_means_phases):
             ax.plot(x[2]+.015, resistance,markersize=weight, color = 'white', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
             ax.plot(x[2]+.015, resistance,markersize=weight, color = 'red', marker = marker, markeredgecolor = color, markeredgewidth=2, alpha=.2)        
             
-
-    ax.plot(x[0],mean_diff_sub30, markersize=15, color='purple', marker = 'o')
-    ax.plot(x[1],mean_diff_over30sub60, markersize=15, color='purple', marker = 'o')
-    ax.plot(x[2],mean_diff_over60, markersize=15, color='purple', marker = 'o')
-
     plt.xlim(.1,.5)
+
+    ax.plot(x[0],mean_diff_sub30, markersize=15, color='white', markeredgecolor = 'purple', marker = 'o')
+    ax.plot(x[1],mean_diff_over30sub60, markersize=15, color='white', markeredgecolor = 'purple', marker = 'o')
+    ax.plot(x[2],mean_diff_over60, markersize=15, color='white', markeredgecolor = 'purple', marker = 'o')
+
+    ax.plot([x[0],x[0]],[mean_diff_sub30-sem_diff_sub30,mean_diff_sub30+sem_diff_sub30],color='purple', lw=3)
+    ax.plot([x[1],x[1]],[mean_diff_over30sub60-sem_diff_over30sub60,mean_diff_over30sub60+sem_diff_over30sub60],color='purple', lw=3)
+    ax.plot([x[2],x[2]],[mean_diff_over60-sem_diff_over60,mean_diff_over60+sem_diff_over60],color='purple', lw=3)
 
     ax.set_xticks(x)
 
@@ -1060,11 +1194,11 @@ def suppfigs(data, p_value, weighted_means_phases):
     ax.plot(.125,95,markersize=10,marker='_',color='white',markeredgecolor = 'magenta')
     plt.text(.140, 93, 'Paediatric only', fontsize=12)
 
-    ax.plot(.125,90,markersize=10,marker='o',color='white',markeredgecolor = 'black')
+    ax.plot(.125,90,markersize=10,marker='_',color='white',markeredgecolor = 'black')
     plt.text(.140, 88, 'Mixed', fontsize=12)
 
-    ax.plot(.125,85,markersize=10,marker='o',color='purple')
-    plt.text(.140, 83, 'Mean diff.', fontsize=12)
+    ax.plot(.125,85,markersize=10,marker='o',color='white', markeredgecolor = 'purple')
+    plt.text(.140, 83, 'Weighted Mean.', fontsize=12)
 
     ax.plot(.125,80,markersize=10,marker='o',color='blue')
     plt.text(.140, 78, 'HIC', fontsize=12)
@@ -1072,6 +1206,6 @@ def suppfigs(data, p_value, weighted_means_phases):
     ax.plot(.125,75,markersize=10,marker='o',color='red')
     plt.text(.140, 73, 'LMIC', fontsize=12)
 
-    plt.close(SuppFig1D)
+    plt.close(SuppFig1C)
 
-    return(data_hic, data_lmic, cont_table, cont_stats, SuppFig1B, SuppFig1C, SuppFig1D)
+    return(nonweighted_stats_phases_eco, weighted_stats_phases_eco, cont_table, cont_stats, perc_table, Fig1C, SuppFig1B, SuppFig1C)
