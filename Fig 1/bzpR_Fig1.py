@@ -1110,7 +1110,7 @@ def suppfigs(data, p_value, weighted_stats_phases):
 
         elif age == 'adult':
             
-            color = 'orange'
+            color = 'green'
 
         elif age == 'both':
             
@@ -1188,7 +1188,7 @@ def suppfigs(data, p_value, weighted_stats_phases):
 
     ax.set_ylabel('BZP-R (%)')
 
-    ax.plot(.125,100,markersize=10,marker='_',color='white',markeredgecolor = 'orange')
+    ax.plot(.125,100,markersize=10,marker='_',color='white',markeredgecolor = 'green')
     plt.text(.140, 98, 'Adult only', fontsize=12)
 
     ax.plot(.125,95,markersize=10,marker='_',color='white',markeredgecolor = 'magenta')
