@@ -144,58 +144,43 @@ def fig1A(data):
                     }
    
     #plotting new figure which collapses data to separate only between economic groups
+            
+    yA, yB, yC = hic_data, lmic_data, mean_total
+
+    x = [.2, .25, .3]
+
+    xA, xB, xC = np.random.normal(.2, 0.01, len(hic_data)), np.random.normal(.3, 0.01, len(lmic_data)), .25
 
     Fig1A,ax=plt.subplots(figsize=(5,5))
 
     plt.title('Fig1A')
 
-    x = [.2,.3]
+    ax.scatter(xA, yA, s=100, color='blue', marker = 'o',alpha=.2)
+    ax.scatter(xB, yB, s=100, color='red', marker = 'o',alpha=.2)
 
-    total_episodes = data['episodes'].sum()
-
-    freq = data['state'].value_counts()
-
-    for i in range(len(data)):
-        
-        group = data.state[i]
-                
-        resistance = data.resistance[i]
-               
-        if group == 'HIC':
-            
-            ax.plot(x[0], resistance,markersize=10, color='blue', marker = 'o',alpha=.2)
-
-        elif group == 'LMIC':
-            
-            ax.plot(x[1], resistance,markersize=10, color='red', marker = 'o',alpha=.2)    
-            
     plt.xlim(.1,.4)
 
     ax.set_xticks(x)
 
-    labels = ['HIC','LMIC']
+    labels = ['HIC', 'Mean Total', 'LMIC']
 
     ax.set_xticklabels(labels)
 
     ax.set_ylabel('BZP-R (%)')
 
     ax.plot([x[0],x[0]],[mean_hic-sem_hic,mean_hic+sem_hic],color='blue', lw=3)
-    ax.plot([x[1],x[1]],[mean_lmic-sem_lmic,mean_lmic+sem_lmic],color='red', lw=3)
-    ax.plot([.25,.25],[mean_total-sem_total,mean_total+sem_total],color='purple', lw=3)
+    ax.plot([x[2],x[2]],[mean_lmic-sem_lmic,mean_lmic+sem_lmic],color='red', lw=3)
+    ax.plot([x[1],x[1]],[mean_total-sem_total,mean_total+sem_total],color='grey', lw=3)
 
     ax.plot(x[0],mean_hic, markersize=15, color='white',markeredgecolor = 'blue', marker = 'o')
-    ax.plot(x[1],mean_lmic, markersize=15, color='white',markeredgecolor = 'red', marker = 'o')
-    ax.plot(.25,mean_total, markersize=15, color='white',markeredgecolor = 'purple', marker = 'o')
-
-    ax.plot(.115,88,markersize=10, color='white',markeredgecolor = 'purple', marker = 'o')
-    plt.text(.130, 86, 'Mean total', fontsize=12)
+    ax.plot(x[2],mean_lmic, markersize=15, color='white',markeredgecolor = 'red', marker = 'o')
+    ax.plot(x[1],mean_total, markersize=15, color='white',markeredgecolor = 'grey', marker = 'o')
 
     axes_limits = ax.get_ylim()
 
-    ax.plot([x[0],x[1]],[axes_limits[1],axes_limits[1]],color='black', lw=1)
+    ax.plot([x[0],x[2]],[axes_limits[1],axes_limits[1]],color='black', lw=1)
 
-
-    posOne = x[1]-(x[1]-x[0])+(x[1]-x[0])/4
+    posOne = x[2]-(x[2]-x[0])+(x[2]-x[0])/4
 
     p = 'p = ' + str(np.round(p_value[1],2))
 
@@ -475,31 +460,15 @@ def fig1B(data):
 
     plt.title('Fig1B')
 
-    x = [.2,.3]
+    yA, yB = sub60_f[:,0], over60_f[:,0]
 
-    for i in range(len(sub60_f)):
-                    
-            weight = 10
-                
-            marker = 'o'
+    x = [.2, .3]
 
-            resistance = sub60_f[i,0]
+    xA, xB, xC = np.random.normal(.2, 0.01, len(yA)), np.random.normal(.3, 0.01, len(yB)), .25
 
-            color = 'purple'
+    ax.scatter(xA, yA, s=100, color='purple', marker = 'o',alpha=.2)
+    ax.scatter(xB, yB, s=100, color='purple', marker = 'o',alpha=.2)
 
-            ax.plot(x[0], resistance,markersize=weight, color = color, marker = marker, alpha=.2)
-            
-    for i in range(len(over60_f)):
-                    
-            weight = 10
-                
-            marker = 'o'
-
-            resistance = over60_f[i,0]
-
-            color = 'purple'
-
-            ax.plot(x[1], resistance,markersize=weight, color = color, marker = marker, alpha=.2)
 
     ax.plot([x[0],x[0]],[mean_sub60-sem_sub60,mean_sub60+sem_sub60],color='purple', lw=3)
     ax.plot([x[1],x[1]],[mean_over60-sem_over60,mean_over60+sem_over60],color='purple', lw=3)
@@ -1030,11 +999,11 @@ def suppfigs(data, p_value, weighted_stats_phases):
 
     plt.title('Fig1C')
 
-    ax.bar([.2,.3], [hic_sub60_perc,lmic_sub60_perc], color=['blue','red'], width = .05, alpha=.25)
+    ax.bar([.2,.3], [100,100], color=['blue','red'], width = .05)
 
-    ax.bar([.2,.3], [hic_over60_perc,lmic_over60_perc], bottom = [hic_sub60_perc,lmic_sub60_perc],color=['white','white'], width = .05)
+    ax.bar([.2,.3], [hic_sub60_perc,lmic_sub60_perc], bottom = [hic_over60_perc,lmic_over60_perc],color=['white','white'], width = .05)
 
-    ax.bar([.2,.3], [hic_over60_perc,lmic_over60_perc], bottom = [hic_sub60_perc,lmic_sub60_perc],color=['blue','red'], width = .05)
+    ax.bar([.2,.3], [hic_sub60_perc,lmic_sub60_perc], bottom = [hic_over60_perc,lmic_over60_perc],color=['blue','red'], width = .05, alpha = .25)
 
     ax.set_ylabel('Proportion of studies (%)')
 
