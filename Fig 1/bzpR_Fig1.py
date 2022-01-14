@@ -492,7 +492,7 @@ def fig1B(data):
 
     posOne = x[1]-(x[1]-x[0])+(x[1]-x[0])/4
 
-    p = 'p = ' + str(np.round(p_value[1],4))
+    p = 'p = ' + str(np.round(p_value[1],2))
 
     font_size = 10
 
