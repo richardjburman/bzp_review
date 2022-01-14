@@ -1,33 +1,33 @@
-study,year,region,state,age,resistance,episodes,phase,,,
-Skinner et al,2010,HND,LMIC,adult,65,31,>60min,,,
-Burman et al,2019,SA,LMIC,paediatric,48,144,31-60min,,,
-Theusinger,2019,CHE,HIC,adult,28,126,10-30min,,,
-Theusinger,2019,CHE,HIC,paediatric,3,39,10-30min,,,
-Kay et al,2019,DEU,HIC,adult,28,42,31-60min,,,
-Hasan et al,2016,IND,LMIC,both,78,84,>60min,,,
-Navarro et al,2016,FRA,HIC,adult,16,68,>60min,,,
-Chamberlain et al,2014,USA,HIC,paediatric,15,273,unknown,,,
-Thakker et al,2013,IND,LMIC,paediatric,54,50,31-60min,,,
-Silbergleit et al,2012,USA,HIC,both,43,509,unknown,,,
-Mirsa et al,2012,IND,LMIC,adult,24,79,10-30min,,,
-Gathwala et al,2012,IND,LMIC,paediatric,14,120,unknown,,,
-Arya et al,2011,IND,LMIC,paediatric,18,141,unknown,,,
-Chen et al,2011,CHN,LMIC,adult,38,121,31-60min,,,
-Amare et al,2008,ETH,LMIC,adult,63,119,>60min,,,
-Chin et al ,2008,GBR,HIC,paediatric,35,240,31-60min,,,
-Mpimbaza et al,2008,UGA,LMIC,paediatric,37,330,>60min,,,
-Ahmad et al,2006,MWI,LMIC,paediatric,25,80,>60min,,,
-McIntyre et al,2005,GBR,HIC,paediatric,58,219,31-60min,,,
-Qureshi et al,2002,GBR,HIC,paediatric,25,48,31-60min,,,
-Mayer et al,2002,USA,HIC,adult,69,83,>60min,,,
-Alldredge et al,2001,USA,HIC,adult,49,134,31-60min,,,
-Fisgin et al,2001,TUR,LMIC,paediatric,42,45,>60min,,,
-Tabarki et al,2001,TUN,LMIC,paediatric,45,139,>60min,,,
-Lahat et al,2000,ISR,HIC,paediatric,5,44,10-30min,,,
-Coeytaux et al ,2000,CHE,HIC,both,12,172,>60min,,,
-Scott et al,1999,GBR,HIC,both,33,42,31-60min,,,
-Treiman et al,1998,USA,HIC,adult,35,384,unknown,,,
-Chamberlain et al,1997,USA,HIC,paediatric,8,24,31-60min,,,
-Appleton et al,1995,GBR,HIC,paediatric,21,86,31-60min,,,
-Remy et al,1992,FRA,HIC,adult,28,39,unknown,,,
-Das et al,2020,IND,LMIC,paediatric,89,94,>60min,,,
+study,year,region,state,age,resistance,episodes,phase
+Skinner et al,2010,HND,LMIC,adult,65,31,>60min
+Burman et al,2019,SA,LMIC,paediatric,48,144,31-60min
+Theusinger,2019,CHE,HIC,adult,28,126,10-30min
+Theusinger,2019,CHE,HIC,paediatric,3,39,10-30min
+Kay et al,2019,DEU,HIC,adult,28,42,31-60min
+Hasan et al,2016,IND,LMIC,both,78,84,>60min
+Navarro et al,2016,FRA,HIC,adult,16,68,>60min
+Chamberlain et al,2014,USA,HIC,paediatric,15,273,unknown
+Thakker et al,2013,IND,LMIC,paediatric,54,50,31-60min
+Silbergleit et al,2012,USA,HIC,both,43,509,unknown
+Mirsa et al,2012,IND,LMIC,adult,24,79,10-30min
+Gathwala et al,2012,IND,LMIC,paediatric,14,120,unknown
+Arya et al,2011,IND,LMIC,paediatric,18,141,unknown
+Chen et al,2011,CHN,LMIC,adult,38,121,31-60min
+Amare et al,2008,ETH,LMIC,adult,63,119,>60min
+Chin et al ,2008,GBR,HIC,paediatric,35,240,31-60min
+Mpimbaza et al,2008,UGA,LMIC,paediatric,37,330,>60min
+Ahmad et al,2006,MWI,LMIC,paediatric,25,80,>60min
+McIntyre et al,2005,GBR,HIC,paediatric,58,219,31-60min
+Qureshi et al,2002,GBR,HIC,paediatric,25,48,31-60min
+Mayer et al,2002,USA,HIC,adult,69,83,>60min
+Alldredge et al,2001,USA,HIC,adult,49,134,31-60min
+Fisgin et al,2001,TUR,LMIC,paediatric,42,45,>60min
+Tabarki et al,2001,TUN,LMIC,paediatric,45,139,>60min
+Lahat et al,2000,ISR,HIC,paediatric,5,44,10-30min
+Coeytaux et al ,2000,CHE,HIC,both,12,172,>60min
+Scott et al,1999,GBR,HIC,both,33,42,31-60min
+Treiman et al,1998,USA,HIC,adult,35,384,unknown
+Chamberlain et al,1997,USA,HIC,paediatric,8,24,31-60min
+Appleton et al,1995,GBR,HIC,paediatric,21,86,31-60min
+Remy et al,1992,FRA,HIC,adult,28,39,unknown
+Das et al,2020,IND,LMIC,paediatric,89,94,>60min
